@@ -2,189 +2,249 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Terminal as TerminalIcon, ShieldCheck, Cpu, Code2, Activity, Database, Zap, Lock } from "lucide-react";
+import {
+  Terminal as TerminalIcon,
+  ShieldCheck,
+  Cpu,
+  Code2,
+  Activity,
+  Database,
+  Zap,
+  Lock,
+  ChevronRight,
+} from "lucide-react";
 
 interface LogEntry {
-  year?: string;
   text: string;
-  status: "success" | "info" | "warning" | "error" | "system";
+  status: "success" | "info" | "warning" | "system";
   icon?: React.ReactNode;
-  delay?: number;
+  prefix?: string;
 }
 
 const bootLogs: LogEntry[] = [
-  { text: "INITIALIZING NAVEEN_RAJ_CORE V6.0.4...", status: "system", delay: 0 },
-  { text: "LOADING NEURAL_RAG_ENGINE... [OK]", status: "success", icon: <Database className="w-3 h-3" />, delay: 400 },
-  { text: "BOOTING MULTI_AGENT_ORCHESTRATOR...", status: "system", delay: 800 },
-  { text: "CHECKING GPU_ACCELERATION: 4X NVIDIA H100 DETECTED", status: "info", icon: <Zap className="w-3 h-3" />, delay: 1200 },
-  { text: "ESTABLISHING SECURE PROTOCOLS...", status: "system", icon: <Lock className="w-3 h-3" />, delay: 1600 },
-  { text: "SYSTEM STATUS: OPTIMAL. ACCESS GRANTED.", status: "success", delay: 2000 },
+  { text: "INITIALIZING NAVEEN_RAJ_CORE V6.0.4...", status: "system", prefix: "BOOT" },
+  { text: "LOADING NEURAL_RAG_ENGINE............... [OK]", status: "success", icon: <Database className="w-3 h-3" />, prefix: "BOOT" },
+  { text: "BOOTING MULTI_AGENT_ORCHESTRATOR...", status: "system", prefix: "BOOT" },
+  { text: "GPU_ACCEL: 4X NVIDIA H100 DETECTED", status: "info", icon: <Zap className="w-3 h-3" />, prefix: "SYS " },
+  { text: "SECURE PROTOCOLS ESTABLISHED", status: "system", icon: <Lock className="w-3 h-3" />, prefix: "AUTH" },
+  { text: "SYSTEM OPTIMAL. ACCESS GRANTED.", status: "success", prefix: "CORE" },
 ];
 
-const mainLogs: LogEntry[] = [
-  { year: "2019", text: "> Booting Web Dev Stack...", status: "success", icon: <Code2 className="w-4 h-4" /> },
-  { year: "2019", text: "[INFO] Freelance career initialized. Mastered LAMP stack.", status: "info" },
-  { year: "2021", text: "[DEKAP] Scaling B2B e-commerce platforms. Next.js & GraphQL.", status: "info" },
-  { year: "2024", text: "[TENANT INC] Senior FE/BE integration. FastAPI & Nuxt.js.", status: "info" },
-  { year: "2025", text: "> RECALIBRATING: Focused on Agentic AI & RAG.", status: "warning", icon: <Cpu className="w-4 h-4" /> },
-  { year: "2026", text: "[PRESENT] Technical Lead. Orchestrating Multi-Agent Systems.", status: "success", icon: <ShieldCheck className="w-4 h-4" /> },
+const careerLogs: LogEntry[] = [
+  { text: "> init_career_stack()", status: "system", prefix: "2019" },
+  { text: "FREELANCE: Web Dev Stack initialized. LAMP, Laravel, PHP", status: "info", icon: <Code2 className="w-3 h-3" />, prefix: "2019" },
+  { text: "DCKAP: B2B e-commerce. Next.js, GraphQL, Node.js", status: "info", icon: <Code2 className="w-3 h-3" />, prefix: "2021" },
+  { text: "TENANT: Senior FE/BE. FastAPI, Nuxt.js, Microservices", status: "info", icon: <Cpu className="w-3 h-3" />, prefix: "2024" },
+  { text: "> RECALIBRATING: Focus → Agentic AI & RAG Pipelines", status: "warning", icon: <Cpu className="w-3 h-3" />, prefix: "2025" },
+  { text: "PRESENT: Technical Lead. Multi-Agent Orchestration.", status: "success", icon: <ShieldCheck className="w-3 h-3" />, prefix: "2026" },
 ];
 
-const TypewriterText = ({ text, delay = 0, onComplete }: { text: string; delay?: number; onComplete?: () => void }) => {
+const TypewriterText = ({ text, speed = 20 }: { text: string; speed?: number }) => {
   const [displayedText, setDisplayedText] = useState("");
-  
+
   useEffect(() => {
-    const startTimeout = setTimeout(() => {
-      let currentIndex = 0;
-      const interval = setInterval(() => {
-        if (currentIndex <= text.length) {
-          setDisplayedText(text.slice(0, currentIndex));
-          currentIndex++;
-        } else {
-          clearInterval(interval);
-          onComplete?.();
-        }
-      }, 25);
-      return () => clearInterval(interval);
-    }, delay);
-    
-    return () => clearTimeout(startTimeout);
-  }, [text, delay, onComplete]);
+    let idx = 0;
+    const interval = setInterval(() => {
+      if (idx <= text.length) {
+        setDisplayedText(text.slice(0, idx));
+        idx++;
+      } else {
+        clearInterval(interval);
+      }
+    }, speed);
+    return () => clearInterval(interval);
+  }, [text, speed]);
 
   return <span>{displayedText}</span>;
 };
 
 export const AgentTerminal = () => {
-  const [allVisibleLogs, setAllVisibleLogs] = useState<LogEntry[]>([]);
+  const [activeTab, setActiveTab] = useState<"system" | "career">("system");
+  const [visibleLogs, setVisibleLogs] = useState<LogEntry[]>([]);
   const [currentStep, setCurrentStep] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
-  
-  const allLogs = [...bootLogs, ...mainLogs];
+
+  const logs = activeTab === "system" ? bootLogs : careerLogs;
 
   useEffect(() => {
-    if (currentStep < allLogs.length) {
-      const nextLog = allLogs[currentStep];
-      // Automatically advance if it's not the first few or adds a small natural delay
+    setVisibleLogs([]);
+    setCurrentStep(0);
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (currentStep < logs.length) {
       const timer = setTimeout(() => {
-        setAllVisibleLogs(prev => [...prev, nextLog]);
-        setCurrentStep(prev => prev + 1);
-      }, currentStep < bootLogs.length ? 300 : 1000);
+        setVisibleLogs((prev) => [...prev, logs[currentStep]]);
+        setCurrentStep((prev) => prev + 1);
+      }, activeTab === "system" ? 250 : 600);
       return () => clearTimeout(timer);
     }
-  }, [currentStep]);
+  }, [currentStep, logs, activeTab]);
 
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [allVisibleLogs]);
+  }, [visibleLogs]);
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "success": return "text-emerald-400";
+      case "warning": return "text-amber-400";
+      case "system": return "text-cyber-cyan/80";
+      default: return "text-gray-400";
+    }
+  };
+
+  const getPrefixColor = (status: string) => {
+    switch (status) {
+      case "success": return "text-emerald-500/60";
+      case "warning": return "text-amber-500/60";
+      case "system": return "text-cyber-cyan/40";
+      default: return "text-gray-600";
+    }
+  };
 
   return (
     <section id="about" className="py-24 bg-cyber-dark px-6 relative overflow-hidden">
-      {/* Background Ambience */}
-      <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(26,27,75,0.3),transparent_70%)] pointer-events-none" />
-      
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(26,27,75,0.2),transparent_70%)] pointer-events-none" />
+
       <div className="max-w-4xl mx-auto relative z-10">
+        {/* Section label */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-10"
+        >
+          <span className="text-[11px] font-mono text-cyber-cyan/50 tracking-[0.3em] uppercase">
+            — SYSTEM LOG —
+          </span>
+        </motion.div>
+
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="relative rounded-xl overflow-hidden glass shadow-[0_20px_50px_rgba(0,0,0,0.8)] border border-white/10 terminal-container terminal-glow group"
+          className="relative rounded-2xl overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.7)] border border-white/[0.08] terminal-container terminal-glow"
         >
           {/* Header */}
-          <div className="px-6 py-4 bg-cyber-indigo/60 md:bg-cyber-indigo/40 flex items-center justify-between border-b border-white/10 backdrop-blur-xl">
+          <div className="px-5 py-3 bg-cyber-dark-card/80 flex items-center justify-between border-b border-white/[0.06] backdrop-blur-xl">
             <div className="flex items-center gap-4">
+              {/* Traffic lights */}
               <div className="flex gap-2">
-                <div className="w-3 h-3 rounded-full bg-red-500/40 border border-red-500/20 group-hover:bg-red-500/60 transition-colors" />
-                <div className="w-3 h-3 rounded-full bg-yellow-500/40 border border-yellow-500/20 group-hover:bg-yellow-500/60 transition-colors" />
-                <div className="w-3 h-3 rounded-full bg-green-500/40 border border-green-500/20 group-hover:bg-green-500/60 transition-colors" />
+                <div className="w-3 h-3 rounded-full bg-[#ff5f57]/60 border border-[#ff5f57]/30" />
+                <div className="w-3 h-3 rounded-full bg-[#febc2e]/60 border border-[#febc2e]/30" />
+                <div className="w-3 h-3 rounded-full bg-[#28c840]/60 border border-[#28c840]/30" />
               </div>
-              <div className="h-4 w-[1px] bg-white/10 mx-2 hidden md:block" />
-              <span className="text-[10px] md:text-xs font-mono text-cyber-cyan/70 uppercase tracking-[0.2em] font-bold">
-                SYSTEM_LOG :: NAVEEN_RAJ_CORE
-              </span>
+              <div className="h-4 w-px bg-white/10 hidden md:block" />
+
+              {/* Tabs */}
+              <div className="flex items-center gap-1 hidden md:flex">
+                <button
+                  onClick={() => setActiveTab("system")}
+                  className={`px-3 py-1 rounded-md text-[10px] font-mono tracking-wider transition-all duration-200 ${
+                    activeTab === "system"
+                      ? "bg-cyber-cyan/10 text-cyber-cyan border border-cyber-cyan/20"
+                      : "text-gray-500 hover:text-gray-300"
+                  }`}
+                >
+                  system_log
+                </button>
+                <button
+                  onClick={() => setActiveTab("career")}
+                  className={`px-3 py-1 rounded-md text-[10px] font-mono tracking-wider transition-all duration-200 ${
+                    activeTab === "career"
+                      ? "bg-cyber-cyan/10 text-cyber-cyan border border-cyber-cyan/20"
+                      : "text-gray-500 hover:text-gray-300"
+                  }`}
+                >
+                  career_log
+                </button>
+              </div>
             </div>
             <div className="flex items-center gap-3">
-               <Activity className="w-3 h-3 text-cyber-magenta animate-pulse" />
-               <TerminalIcon className="w-4 h-4 text-cyber-cyan" />
+              <Activity className="w-3 h-3 text-emerald-400 animate-pulse" />
+              <span className="text-[9px] font-mono text-white/30 tracking-widest hidden md:inline">
+                NAVEEN_RAJ_CORE
+              </span>
             </div>
           </div>
 
           {/* Terminal Content */}
-          <div 
+          <div
             ref={scrollRef}
-            className="p-4 md:p-6 h-[500px] overflow-y-auto font-mono text-xs md:text-sm design-scrollbar bg-[#050510]/80 relative"
+            className="p-5 md:p-6 min-h-[280px] max-h-[380px] overflow-y-auto font-mono text-[13px] leading-relaxed design-scrollbar bg-[#050510]/90 relative"
           >
-            {/* Scanline Overlay */}
             <div className="scanline" />
-            
-            <div className="space-y-1">
+
+            <div className="space-y-1.5">
               <AnimatePresence>
-                {allVisibleLogs.map((log, index) => (
+                {visibleLogs.map((log, index) => (
                   <motion.div
-                    key={index}
-                    initial={{ opacity: 0, x: -10 }}
+                    key={`${activeTab}-${index}`}
+                    initial={{ opacity: 0, x: -8 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="flex flex-col md:flex-row md:gap-4 group/line"
+                    transition={{ duration: 0.2 }}
+                    className="flex items-start gap-3 group/line py-0.5 rounded px-2 hover:bg-white/[0.02] transition-colors"
                   >
-                    {log.year ? (
-                      <span className="text-cyber-cyan font-bold whitespace-nowrap mb-1 md:mb-0">
-                        <span className="opacity-40">[</span>
-                        {log.year}
-                        <span className="opacity-40">]</span>
-                      </span>
-                    ) : (
-                      <span className="text-white/20 whitespace-nowrap mb-1 md:mb-0 hidden md:inline">
-                         <span className="opacity-10">[</span>SYS<span className="opacity-10">]</span>
+                    {/* Line number */}
+                    <span className="text-white/15 text-[11px] tabular-nums w-5 text-right flex-shrink-0 select-none pt-0.5">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+
+                    {/* Prefix */}
+                    <span className={`${getPrefixColor(log.status)} text-[11px] w-10 flex-shrink-0 font-bold pt-0.5`}>
+                      [{log.prefix}]
+                    </span>
+
+                    {/* Icon */}
+                    {log.icon && (
+                      <span className={`${getStatusColor(log.status)} flex-shrink-0 pt-0.5 opacity-60`}>
+                        {log.icon}
                       </span>
                     )}
-                    
-                    <div className={`flex items-start gap-3 rounded px-2 transition-colors duration-200 ${
-                      log.status === "success" ? "text-green-400 group-hover/line:bg-green-500/5" : 
-                      log.status === "warning" ? "text-yellow-400 group-hover/line:bg-yellow-500/5" : 
-                      log.status === "error" ? "text-red-400 group-hover/line:bg-red-500/5" :
-                      log.status === "system" ? "text-cyber-cyan/90 group-hover/line:bg-cyber-cyan/5" :
-                      "text-gray-400 group-hover/line:bg-white/5"
-                    }`}>
-                      {log.icon && (
-                        <span className={`mt-0.5 shrink-0 ${
-                          log.status === "success" ? "text-green-500/70" : 
-                          log.status === "warning" ? "text-yellow-500/70" : 
-                          "text-cyber-cyan/70"
-                        }`}>
-                          {log.icon}
-                        </span>
+
+                    {/* Text */}
+                    <span className={`${getStatusColor(log.status)} break-words`}>
+                      <TypewriterText text={log.text} speed={15} />
+                      {index === visibleLogs.length - 1 && currentStep <= logs.length && (
+                        <span className="inline-block w-2 h-[14px] ml-1 bg-cyber-cyan/70 animate-terminal-cursor align-middle" />
                       )}
-                      
-                      <p className="break-words">
-                        <TypewriterText text={log.text} />
-                        {(index === allVisibleLogs.length - 1) && (
-                          <span className="inline-block w-2.5 h-[1.1em] ml-1 bg-cyber-cyan/80 animate-terminal-cursor align-middle" />
-                        )}
-                      </p>
-                    </div>
+                    </span>
                   </motion.div>
                 ))}
               </AnimatePresence>
-              
-              {currentStep === allLogs.length && (
-                <motion.div 
+
+              {/* Completion state */}
+              {currentStep >= logs.length && visibleLogs.length > 0 && (
+                <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="pt-4 flex items-center gap-2 text-cyber-cyan/50 text-[10px] font-bold tracking-widest uppercase border-t border-white/5"
+                  transition={{ delay: 0.5 }}
+                  className="pt-4 mt-2 border-t border-white/[0.04]"
                 >
-                  <span className="w-2 h-2 rounded-full bg-cyber-cyan animate-ping" />
-                  Terminal Instance Active - Monitoring Nodes
+                  <div className="flex items-center gap-2 text-gray-600 text-[11px] font-mono">
+                    <ChevronRight className="w-3 h-3 text-cyber-cyan/40" />
+                    <span className="text-cyber-cyan/30">naveen@core</span>
+                    <span className="text-gray-600">~$</span>
+                    <span className="w-2 h-[13px] bg-cyber-cyan/50 animate-terminal-cursor" />
+                  </div>
                 </motion.div>
               )}
             </div>
           </div>
 
-          {/* Bottom Bar Styling */}
-          <div className="px-6 py-2 bg-cyber-indigo/20 border-t border-white/5 flex justify-between items-center text-[10px] font-mono text-white/30">
-            <span>MEM: 12.4GB / 128GB</span>
-            <span>Uptime: 432:12:05</span>
+          {/* Bottom Status Bar */}
+          <div className="px-5 py-2 bg-cyber-dark-card/60 border-t border-white/[0.04] flex justify-between items-center text-[10px] font-mono text-white/20">
+            <div className="flex items-center gap-4">
+              <span className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400/60" />
+                CONNECTED
+              </span>
+              <span>MEM: 12.4GB</span>
+            </div>
+            <span>UTF-8 | LF</span>
           </div>
         </motion.div>
       </div>
