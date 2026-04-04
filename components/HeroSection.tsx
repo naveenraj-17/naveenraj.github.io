@@ -212,7 +212,7 @@ export const HeroSection = () => {
               <div className="w-px h-10 bg-white/10" />
               <AnimatedCounter target={10} suffix="+" label="Projects" delay={1400} />
               <div className="w-px h-10 bg-white/10" />
-              <AnimatedCounter target={3} label="Companies" delay={1600} />
+              <AnimatedCounter target={15} label="Tech Stacks" delay={1600} />
             </motion.div>
           </div>
 

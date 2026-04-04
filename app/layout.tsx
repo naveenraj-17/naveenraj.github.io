@@ -16,6 +16,10 @@ export const metadata: Metadata = {
   title: "Naveen Raj | Technical Lead & AI Orchestration Engineer",
   description: "Portfolio of Naveen Raj, a Technical Lead specializing in AI Agent Orchestration, RAG pipelines, and high-scale Full Stack development.",
   keywords: ["Naveen Raj", "AI Agent", "Orchestration Engineer", "Technical Lead", "Synapse AI", "RAG", "MCP", "Full Stack Developer"],
+  icons: {
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+  },
 };
 
 export default function RootLayout({

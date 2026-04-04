@@ -9,7 +9,7 @@ const skills = [
   {
     category: "AI & Orchestration",
     icon: <Cpu />,
-    items: ["RAG Pipelines", "Multi-Agent DAGs", "MCP Servers", "LLM Integration (Ollama, GPT-4)"],
+    items: ["RAG Pipelines", "Multi-Agent DAGs", "MCP Servers", "LLM Integration (Ollama, GPT-4)", "LangChain"],
     proficiency: 90,
     color: "from-cyan-400 to-blue-500",
     glowColor: "rgba(0, 243, 255, 0.15)",
@@ -33,7 +33,7 @@ const skills = [
   {
     category: "Backend & Scaling",
     icon: <Rocket />,
-    items: ["Python (FastAPI)", "Microservices", "Docker & Kubernetes", "AWS CI/CD"],
+    items: ["Python (FastAPI)", "Microservices", "Docker & Kubernetes", "AWS CI/CD", "PHP", "Redis"],
     proficiency: 85,
     color: "from-pink-400 to-rose-500",
     glowColor: "rgba(255, 0, 255, 0.1)",
@@ -45,7 +45,7 @@ const skills = [
   {
     category: "Databases & Vector",
     icon: <Database />,
-    items: ["MongoDB", "PostgreSQL", "ChromaDB", "Vector DB (Pinecone)"],
+    items: ["MongoDB", "PostgreSQL", "ChromaDB", "Vector DB (Pinecone)", "MySQL", "DynamoDB"],
     proficiency: 88,
     color: "from-blue-400 to-sky-500",
     glowColor: "rgba(56, 189, 248, 0.12)",
