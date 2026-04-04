@@ -139,7 +139,7 @@ export const HeroSection = () => {
               <h1 className="text-5xl md:text-7xl lg:text-[5.2rem] font-black tracking-tight mb-2 font-outfit leading-[1.05]">
                 <span className="text-4xl md:text-6xl text-white block">Hi&nbsp;&nbsp;There,</span>
                 <span className="text-white block glitch-text">
-                  <span className="text-4xl md:text-6xl">I'm&nbsp;&nbsp;</span><span className="cyber-text-gradient-subtle">Naveen Raj</span>
+                  <span className="text-4xl md:text-6xl">I&apos;m&nbsp;&nbsp;</span><span className="cyber-text-gradient-subtle">Naveen Raj</span>
                 </span>
               </h1>
             </motion.div>
